@@ -1,2 +1,3 @@
 # Hello-GitUb
-Study how to add a New Repository
+Study how to add a New Repository.
+
