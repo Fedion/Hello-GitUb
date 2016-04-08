@@ -1,0 +1,13 @@
+a.learn some new words.
+  essential.必要的,本质的,基本的,精华的
+  pasture. The cows are out now,grazing in the pasture. 牧草地
+  avatar. This is me,this is my avatar. 化身
+b.learn some skills about Android.
+  b.1 GsonFormat
+  b.2 Ctrl+Alt+M in AndroidStudio 把一些代码提取出来再放在一个单独的方法里
+  b.3 keytool -v -list -keystore keystore.jks show your Project's SHA1
+  b.4 debug your App in Chrome
+c.find some awesome extension/extender/扩展程序 in Chrome
+  OneTab JSONView* Momentum Octotree*
+d.others
+  how to contribute on github.
