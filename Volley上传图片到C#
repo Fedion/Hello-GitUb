@@ -1,0 +1,99 @@
+1、自定义一个MultipartRequest
+public MultipartRequest(String url, Response.ErrorListener errorListener,
+                            Response.Listener<String> listener, String filePartName,
+                            List<File> files, Map<String, String> params) {
+        super(Method.POST, url, errorListener);
+        mFilePartName = filePartName;
+        mListener = listener;
+        mFileParts = files;
+        mParams = params;
+        buildMultipartEntity();
+    }
+
+    private void buildMultipartEntity() {
+        if (mFileParts != null && mFileParts.size() > 0) {
+            for (File file : mFileParts) {
+                entity.addPart(mFilePartName, new FileBody(file,file.getName(), "application/octet-stream","UTF-8"));
+            }
+            long l = entity.getContentLength();
+            LogUtil.d(this.getClass(),mFileParts.size() + "个，长度：" + l);
+        }
+
+        try {
+            if (mParams != null && mParams.size() > 0) {
+                for (Map.Entry<String, String> entry : mParams.entrySet()) {
+                    entity.addPart(entry.getKey(),
+                            new StringBody(entry.getValue(), Charset
+                                    .forName("UTF-8")));
+                }
+            }
+        } catch (UnsupportedEncodingException e) {
+            VolleyLog.e("UnsupportedEncodingException");
+        }
+    }
+客户端的代码网上很多，Volley、android-async-http、单张照片通过JsonObjectRequest传输Base64格式都能实现，重点是网上很难找到的-服务器端。
+2、当初到底卡在哪儿了呢？就是服务器怎么获取，Webservice的方法加不加参数、加几个参数，尝试过传Request、Stream都不对。最后靠试试出来不传
+  参，先返回 request.toString()，request.Headers，总之就是一点点调试，看看System.Web.HttpContext.Current.Request中到底有什么内容。
+3、服务器端代码
+        [WebMethod]
+        public string dealMultipart()
+        {
+            string json = "";
+            try
+            {
+                HttpRequest request = System.Web.HttpContext.Current.Request;
+                //string formkeyss = "";
+                //string formvaluess = "";
+                //string contenttype = request.ContentType;
+                //json = "contenttype从" + contenttype + "止;";
+                //string[] formkeys = request.Form.AllKeys;
+
+                //for (int i = 0; i < formkeys.Length; i++)
+                //{
+                //    formkeyss += "第[" + (i + 1) + "]个:" + formkeys[i];
+                //    formvaluess += "第[" + (i + 1) + "]个值:" + request.Form.Get(formkeys[i]);
+                //}
+                //json += "表单字段从" + formkeyss + "止;表单值从" + formvaluess + "止;";
+
+                string tab = request.Form.Get("tab");
+                string filename = request.Form.Get("filename");
+                string content = request.Form.Get("content");
+
+                HttpFileCollection FileCollect = request.Files;
+
+                json += "文件个数：" + FileCollect.Count ;
+                
+                string filepath = Server.MapPath("~/Images") + "\\";
+                if (!Directory.Exists(filepath))  //不存在文件夹，创建
+                {
+                    Directory.CreateDirectory(filepath);  //创建新的文件夹
+                }
+
+                for (int i = 0; i < FileCollect.Count; i++)
+                {
+                    HttpPostedFile mypost = FileCollect[i]; //用key获取单个文件对象HttpPostedFile
+                    try
+                    {
+                        if (mypost.ContentLength > 0)
+                        {
+                            string pname = mypost.FileName;
+                            string fileType = pname.Substring(pname.LastIndexOf('.'));
+                            string fname = filename + "-" + i + fileType;  //通过此对象获取文件名 (文件名中文显示问号?还未解决，目前是换名字处理了)
+                            string serverpath = filepath + fname;
+                            json += "文件保存路径" + serverpath;
+                            mypost.SaveAs(serverpath);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        json += "【文件保存失败了】" + e.Message;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                json += "获取Request时错了" + e.Message;
+            }
+
+            return json;
+        }
