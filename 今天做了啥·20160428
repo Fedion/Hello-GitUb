@@ -1,0 +1,25 @@
+1、Java 
+   字符串数据转换成List：List<String> list = Arrays.asList(new String[]{"","","",""})
+   List转换成ArrayList：一般不提倡这样转换，正常情况下我们都会这样写-List list = new ArrayList();
+   但是保不齐遇到特殊情况，我们就需要这样转换-ArrayList arrayList = new ArrayList(list);
+2、Android
+  2.1ImageLoader 
+  universal-image-loader-1.9.5.jar 很好用，经常是这样的情况：九宫格显示图片，九宫格是一个GridView，自然他就有一个GridAdapter。下面贴上主要代码，github上有，已经加了星标，下次好找。
+  private ImageLoader imageLoader = ImageLoader.getInstance();
+  然后初始化，现在将初始化封装成一个方法，为了防止重复init
+  if(!imageLoader.isInited()){
+      initImageLoader(context);
+  }
+  public void initImageLoader(Context context){
+      imageLoader.init(ImageLoaderConfiguration.createDefault(context));
+  }
+  
+  getView里
+  DisplayImageOptions options = new DisplayImageOptions.Builder()//
+                                .cacheInMemory(true)//
+                                .cacheOnDisk(true)//
+                                .bitmapConfig(Bitmap.Config.RGB_565)//
+                                .build();
+  imageLoader.displayImage(url,holder.image,options);
+  
+            
